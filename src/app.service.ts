@@ -7,5 +7,9 @@ export class AppService {
   }
   getBye(): string {
     return 'Good Bye!';
+
+  }
+  getHi(): string {
+    return 'Hi!';
   }
 }
