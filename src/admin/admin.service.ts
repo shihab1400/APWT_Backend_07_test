@@ -1,68 +1,54 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AdminDTO } from './admin.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AdminEntity } from './admin.entity';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
-  adminData: AdminDTO[] = [
-    {
-      id: 1,
-      name: 'Shihab',
-      email: 'shihab@gmail.xyz',
-      nid: '2312345678',
-      profilePic: '12334sdwe',
-    },
-    {
-      id: 2,
-      name: 'Farhat',
-      email: 'farhat@gmail.xyz',
-      nid: '1234125623',
-      profilePic: '23sfdwqed',
-    },
-  ];
+  constructor(
+    @InjectRepository(AdminEntity)
+    private adminRepository: Repository<AdminEntity>,
+  ) {}
 
-  getAllAdmin(): AdminDTO[] {
-    return this.adminData;
+  async getAllAdmin(): Promise<AdminEntity[]> {
+    return await this.adminRepository.find();
   }
 
-  getAdminById(id: number): AdminDTO {
-    const admin = this.adminData.find((i) => i.id === id);
+  async getAdminById(id: number): Promise<AdminEntity> {
+    const admin = await this.adminRepository.findOne({
+      where: { adminId: id },
+    });
     if (!admin) {
-      throw new NotFoundException(`Admin with ID ${id} not found`);
+      throw new NotFoundException(`Admin with ID ${id} not found!`);
     }
     return admin;
   }
 
-  getAdminByQuery(name: string, email: string): AdminDTO[] {
-    const filteredAdmins = this.adminData.filter(
-      (n) =>
-        n.name?.toLowerCase() === name.toLowerCase() &&
-        n.email?.toLowerCase() === email.toLowerCase(),
-    );
-
-    if (filteredAdmins.length === 0) {
-      throw new NotFoundException(
-        `Admin with name "${name}" and email "${email}" not found`,
-      );
-    }
-
-    return filteredAdmins;
+  async getAdminByQuery(name: string, email: string): Promise<AdminEntity[]> {
+    return await this.adminRepository.find({
+      where: {
+        name: Like(`%${name}%`),
+        email: Like(`%${email}%`),
+      },
+    });
   }
 
-  postAdminByBody(data: AdminDTO): AdminDTO {
-    const ex = this.adminData.find((i) => i.id === data.id);
-    if (ex) {
-      throw new NotFoundException(`Admin with ID "${data.id}" already exists`);
-    }
-    this.adminData.push(data);
-    return data;
+  async postAdminByBody(data: AdminDTO): Promise<AdminEntity> {
+    return await this.adminRepository.save(data);
   }
 
-  updateAdmin(id: number, adminObj: AdminDTO): AdminDTO {
-    const adminIndex = this.adminData.findIndex((admin) => admin.id === id);
-    if (adminIndex === -1) {
-      throw new NotFoundException(`Admin with ID ${id} not found`);
+  async updateAdmin(id: number, adminObj: AdminDTO): Promise<AdminEntity> {
+    const findAdmin = await this.adminRepository.findOne({
+      where: { adminId: id },
+    });
+    if (!findAdmin) {
+      throw new NotFoundException(`Admin with ID ${id} not found!`);
     }
-    this.adminData[adminIndex] = adminObj;
-    return adminObj;
+    await this.adminRepository.update(id, adminObj);
+    const updatedAdmin = await this.adminRepository.findOne({
+      where: { adminId: id },
+    });
+    return updatedAdmin!;
   }
 }

@@ -22,12 +22,12 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   @Get()
-  getAllAdmin(): AdminDTO[] {
+  getAllAdmin(): object {
     return this.adminService.getAllAdmin();
   }
 
   @Get('getadminbyid/:id')
-  getAdminById(@Param('id', ParseIntPipe) id: number): AdminDTO {
+  getAdminById(@Param('id', ParseIntPipe) id: number): object {
     return this.adminService.getAdminById(id);
   }
 
@@ -35,7 +35,7 @@ export class AdminController {
   getAdminByQuery(
     @Query('name') name: string,
     @Query('email') email: string,
-  ): AdminDTO[] {
+  ): object {
     return this.adminService.getAdminByQuery(name, email);
   }
 
@@ -62,7 +62,7 @@ export class AdminController {
   postAdminByBody(
     @Body() adminData: AdminDTO,
     @UploadedFile() myfile: Express.Multer.File,
-  ): AdminDTO {
+  ): object {
     adminData.profilePic = myfile.filename;
     return this.adminService.postAdminByBody(adminData);
   }
@@ -71,7 +71,7 @@ export class AdminController {
   updateAdmin(
     @Param('id', ParseIntPipe) id: number,
     @Body() adminData: AdminDTO,
-  ): AdminDTO {
+  ): object {
     return this.adminService.updateAdmin(id, adminData);
   }
 }
