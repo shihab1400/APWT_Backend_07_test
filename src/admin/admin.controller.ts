@@ -11,6 +11,7 @@ import {
   ValidationPipe,
   UseInterceptors,
   UploadedFile,
+  Delete,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminDTO } from './admin.dto';
@@ -73,5 +74,10 @@ export class AdminController {
     @Body() adminData: AdminDTO,
   ): object {
     return this.adminService.updateAdmin(id, adminData);
+  }
+
+  @Delete('deleteadmin/:id')
+  deleteAdmin(@Param('id', ParseIntPipe) id: number): object {
+    return this.adminService.deleteAdmin(id);
   }
 }
