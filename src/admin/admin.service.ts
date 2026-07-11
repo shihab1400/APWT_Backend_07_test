@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { AdminDTO } from './admin.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './admin.entity';
-import { Like, Repository } from 'typeorm';
+import { IsNull, Like, Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
@@ -15,7 +15,7 @@ export class AdminService {
     return await this.adminRepository.find();
   }
 
-  async getAdminById(id: number): Promise<AdminEntity> {
+  async getAdminById(id: string): Promise<AdminEntity> {
     const admin = await this.adminRepository.findOne({
       where: { adminId: id },
     });
@@ -25,20 +25,31 @@ export class AdminService {
     return admin;
   }
 
-  async getAdminByQuery(name: string, email: string): Promise<AdminEntity[]> {
+  async getAdminWithNoName(): Promise<AdminEntity[]> {
+    const admin = await this.adminRepository.find({
+      where: { fullname: IsNull() },
+    });
+    return admin;
+  }
+
+  async getAdminByQuery(
+    fullname: string,
+    email: string,
+  ): Promise<AdminEntity[]> {
     return await this.adminRepository.find({
       where: {
-        name: Like(`%${name}%`),
+        fullname: Like(`%${fullname}%`),
         email: Like(`%${email}%`),
       },
     });
   }
 
   async postAdminByBody(data: AdminDTO): Promise<AdminEntity> {
-    return await this.adminRepository.save(data);
+    const admin = this.adminRepository.create(data); // Converted to entity class instance
+    return await this.adminRepository.save(admin);
   }
 
-  async updateAdmin(id: number, adminObj: AdminDTO): Promise<AdminEntity> {
+  async updateAdmin(id: string, adminObj: AdminDTO): Promise<AdminEntity> {
     const findAdmin = await this.adminRepository.findOne({
       where: { adminId: id },
     });
@@ -52,7 +63,7 @@ export class AdminService {
     return updatedAdmin!;
   }
 
-  async deleteAdmin(id: number): Promise<object> {
+  async deleteAdmin(id: string): Promise<object> {
     const findAdmin = await this.adminRepository.findOne({
       where: { adminId: id },
     });

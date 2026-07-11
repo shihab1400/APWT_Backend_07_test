@@ -5,7 +5,6 @@ import {
   Param,
   Query,
   Post,
-  ParseIntPipe,
   Put,
   UsePipes,
   ValidationPipe,
@@ -28,16 +27,21 @@ export class AdminController {
   }
 
   @Get('getadminbyid/:id')
-  getAdminById(@Param('id', ParseIntPipe) id: number): object {
+  getAdminById(@Param('id') id: string): object {
     return this.adminService.getAdminById(id);
+  }
+
+  @Get('getadminwithnoname')
+  getAdminWithNoName(): object {
+    return this.adminService.getAdminWithNoName();
   }
 
   @Get('getadminbyquery')
   getAdminByQuery(
-    @Query('name') name: string,
+    @Query('fullname') fullname: string,
     @Query('email') email: string,
   ): object {
-    return this.adminService.getAdminByQuery(name, email);
+    return this.adminService.getAdminByQuery(fullname, email);
   }
 
   @UseInterceptors(
@@ -69,15 +73,12 @@ export class AdminController {
   }
 
   @Put('updateadmin/:id')
-  updateAdmin(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() adminData: AdminDTO,
-  ): object {
+  updateAdmin(@Param('id') id: string, @Body() adminData: AdminDTO): object {
     return this.adminService.updateAdmin(id, adminData);
   }
 
   @Delete('deleteadmin/:id')
-  deleteAdmin(@Param('id', ParseIntPipe) id: number): object {
+  deleteAdmin(@Param('id') id: string): object {
     return this.adminService.deleteAdmin(id);
   }
 }
