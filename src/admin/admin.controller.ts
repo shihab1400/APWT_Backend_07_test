@@ -11,16 +11,19 @@ import {
   UseInterceptors,
   UploadedFile,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminDTO } from './admin.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
+import { AdminAuthGuard } from './adminAuth/adminAuth.guard';
 
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @UseGuards(AdminAuthGuard)
   @Get()
   getAllAdmin(): object {
     return this.adminService.getAllAdmin();
@@ -29,6 +32,18 @@ export class AdminController {
   @Get('getadminbyid/:id')
   getAdminById(@Param('id') id: string): object {
     return this.adminService.getAdminById(id);
+  }
+
+  @Get('getadminfullnamebyemail/:email')
+  getAdminFullnameByEmail(
+    @Param('email') email: string,
+  ): Promise<string | null> {
+    return this.adminService.getAdminFullnameByEmail(email);
+  }
+
+  @Get('getadminidbyemail/:email')
+  getAdminIdByEmail(@Param('email') email: string): Promise<string | null> {
+    return this.adminService.getAdminIdByEmail(email);
   }
 
   @Get('getadminwithnoname')
@@ -43,6 +58,11 @@ export class AdminController {
   ): object {
     return this.adminService.getAdminByQuery(fullname, email);
   }
+
+  //   @Get('getadminwithspecificcolumn')
+  //   getadminwithspecificcolumn(): object {
+  //     return this.adminService.getAdminWithSpecificColumn();
+  //   }
 
   @UseInterceptors(
     FileInterceptor('myfile', {
@@ -62,14 +82,14 @@ export class AdminController {
       }),
     }),
   )
-  @Post('postadmin')
+  @Post('addadmin')
   @UsePipes(new ValidationPipe())
-  postAdminByBody(
+  addAdmin(
     @Body() adminData: AdminDTO,
     @UploadedFile() myfile: Express.Multer.File,
   ): object {
     adminData.profilePic = myfile.filename;
-    return this.adminService.postAdminByBody(adminData);
+    return this.adminService.addAdmin(adminData);
   }
 
   @Put('updateadmin/:id')

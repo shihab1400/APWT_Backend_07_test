@@ -2,10 +2,12 @@ import { Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   Matches,
-  Length,
+  //   Length,
   IsOptional,
   IsNumber,
   Min,
+  IsEmail,
+  IsString,
   IsBoolean,
 } from 'class-validator';
 
@@ -14,17 +16,20 @@ export class AdminDTO {
   @Matches(/^[a-zA-Z\s]+$/, {
     message: 'Name must contain only alphabets and spaces',
   })
-  fullname?: string;
+  fullname: string;
+
+  //   @IsNotEmpty()
+  //   username: string;
 
   @IsNotEmpty({ message: 'Email address field is required' })
-  @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.xyz$/, {
-    message: 'Email must be a valid address and use the .xyz domain',
+  @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/, {
+    message: 'Email must be a valid address and use the .com domain',
   })
-  email?: string;
+  email: string;
 
-  @Length(10, 10, { message: 'Length of NID must be 10' })
-  @Matches(/^\d+$/, { message: 'NID must contain only numeric digits' })
-  nid?: string;
+  //   @Length(10, 10, { message: 'Length of NID must be 10' })
+  //   @Matches(/^\d+$/, { message: 'NID must contain only numeric digits' })
+  //   nid?: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -32,13 +37,37 @@ export class AdminDTO {
   @Transform(({ value }) => Number(value))
   phone: number;
 
-  @IsOptional()
+  @IsNotEmpty()
+  password: string;
+
+  //   @Transform(({ value }) => {
+  //     if (value === 'true' || value === true) return true;
+  //     if (value === 'false' || value === false) return false;
+  //   })
   @IsBoolean()
-  @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
-  })
+  @IsOptional()
   isActive?: boolean;
 
+  @IsOptional()
+  otp?: string | null;
+
   profilePic?: string;
+}
+
+export class loginDTO {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+}
+
+export class VerifyOtpDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  otp: string;
 }
