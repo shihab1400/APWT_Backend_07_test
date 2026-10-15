@@ -15,6 +15,26 @@ export class AdminService {
     return await this.adminRepository.find();
   }
 
+  async getAdminFullnameByEmail(email: string): Promise<string | null> {
+    const admin = await this.adminRepository.findOne({
+      where: { email: email },
+    });
+    if (!admin) {
+      throw new NotFoundException(`Admin with email ${email} not found!`);
+    }
+    return admin.fullname;
+  }
+
+  async getAdminIdByEmail(email: string): Promise<string | null> {
+    const admin = await this.adminRepository.findOne({
+      where: { email: email },
+    });
+    if (!admin) {
+      throw new NotFoundException(`Admin with email ${email} not found!`);
+    }
+    return admin.adminId;
+  }
+
   async getAdminById(id: string): Promise<AdminEntity> {
     const admin = await this.adminRepository.findOne({
       where: { adminId: id },
@@ -24,6 +44,16 @@ export class AdminService {
     }
     return admin;
   }
+
+  //   async getAdminWithSpecificColumn(): Promise<AdminEntity[]> {
+  //     const admins = await this.adminRepository.find({
+  //       select: {
+  //         fullname: true,
+  //         nid: true,
+  //       },
+  //     });
+  //     return admins;
+  //   }
 
   async getAdminWithNoName(): Promise<AdminEntity[]> {
     const admin = await this.adminRepository.find({
@@ -44,8 +74,8 @@ export class AdminService {
     });
   }
 
-  async postAdminByBody(data: AdminDTO): Promise<AdminEntity> {
-    const admin = this.adminRepository.create(data); // Converted to entity class instance
+  async addAdmin(myobj: AdminDTO): Promise<AdminEntity> {
+    const admin = this.adminRepository.create(myobj); // Converted to entity class instance
     return await this.adminRepository.save(admin);
   }
 
@@ -63,6 +93,18 @@ export class AdminService {
     return updatedAdmin!;
   }
 
+  async updateStatus(id: string): Promise<{ message: string }> {
+    const findAdmin = await this.adminRepository.findOne({
+      where: { adminId: id },
+    });
+    if (!findAdmin) {
+      throw new NotFoundException(`Admin with ID ${id} not found!`);
+    }
+    await this.adminRepository.update(id, { isActive: true, otp: null });
+
+    return { message: 'Account successfully validated! You can now log in.' };
+  }
+
   async deleteAdmin(id: string): Promise<object> {
     const findAdmin = await this.adminRepository.findOne({
       where: { adminId: id },
@@ -75,5 +117,15 @@ export class AdminService {
       message: `Admin with id ${id} is deleted successfully!`,
     };
     return deletedAdmin;
+  }
+
+  async findOne(email: string): Promise<AdminEntity> {
+    const admin = await this.adminRepository.findOne({
+      where: { email },
+    });
+    if (!admin) {
+      throw new NotFoundException(`Admin with Email ${email} not found!`);
+    }
+    return admin;
   }
 }

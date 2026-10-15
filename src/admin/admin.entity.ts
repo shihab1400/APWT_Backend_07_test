@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert } from 'typeorm';
+import { ChatMessageEntity } from 'src/aibot/aibot.entity';
+import { PaidPatientEntity } from 'src/PaidPatient/paidpatient.entity';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  BeforeInsert,
+  OneToMany,
+} from 'typeorm';
 @Entity('admin')
 export class AdminEntity {
   @PrimaryColumn()
@@ -7,11 +15,14 @@ export class AdminEntity {
   @Column({ type: 'varchar', nullable: true })
   fullname: string | null;
 
-  @Column()
+  //   @Column({ unique: true })
+  //   username?: string;
+
+  @Column({ unique: true })
   email: string;
 
-  @Column()
-  nid: string;
+  //   @Column()
+  //   nid: string;
 
   @Column({
     type: 'bigint',
@@ -19,8 +30,14 @@ export class AdminEntity {
   })
   phone: number;
 
-  @Column({ default: true })
+  @Column()
+  password: string;
+
+  @Column({ default: false })
   isActive: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  otp: string | null;
 
   @Column()
   profilePic: string;
@@ -36,4 +53,10 @@ export class AdminEntity {
 
     this.adminId = `${timerand}-${day}${month}${year}-${rand}`;
   }
+
+  @OneToMany(() => PaidPatientEntity, (paidPatient) => paidPatient.admin)
+  paidPatients: PaidPatientEntity[];
+
+  @OneToMany(() => ChatMessageEntity, (chat) => chat.user)
+  chatMessages: ChatMessageEntity[];
 }
